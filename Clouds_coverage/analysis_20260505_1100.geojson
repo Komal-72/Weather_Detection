@@ -1,0 +1,83 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -39.0,
+              -4.0
+            ],
+            [
+              -39.0,
+              -3.0
+            ],
+            [
+              -38.0,
+              -3.0
+            ],
+            [
+              -38.0,
+              -4.0
+            ],
+            [
+              -39.0,
+              -4.0
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "Analysis Region",
+        "analysis_time_utc": "2026-05-05T11:00:00+00:00",
+        "satellites": [
+          {
+            "satellite": "GOES-19",
+            "priority_order": 1,
+            "cloud_pct": 89.12302024130007,
+            "clear_pct": 10.876979758699928,
+            "effective_pixels": 2093.2,
+            "nodata_pct": 0.0,
+            "dqf_masked_pct": 0.0,
+            "dqf_note": "All pixels DQF-good (0 or 1)",
+            "vza_deg": 42.5,
+            "vza_reliable": true,
+            "vza_threshold_deg": 70.0,
+            "status": "Reliable"
+          },
+          {
+            "satellite": "MTG-0",
+            "priority_order": 2,
+            "cloud_pct": 83.82077725154836,
+            "clear_pct": 16.17922274845164,
+            "effective_pixels": 1998.0,
+            "nodata_pct": 0.0,
+            "dqf_masked_pct": 0.0,
+            "dqf_note": "All pixels DQF-good (0 or 1)",
+            "vza_deg": 44.7,
+            "vza_reliable": true,
+            "vza_threshold_deg": 70.0,
+            "status": "Reliable"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5,
+          -3.5
+        ]
+      },
+      "properties": {
+        "feature_type": "Region Centroid",
+        "analysis_time_utc": "2026-05-05T11:00:00+00:00"
+      }
+    }
+  ]
+}
