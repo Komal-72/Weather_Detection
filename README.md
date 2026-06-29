@@ -1,6 +1,6 @@
 # weather_detection.py
 
-![GOES-19 Global Cloud Forensic Analysis — 2026-05-05 11:00 UTC](Clouds_coverage_c/GOES-19_20260505_1100_forensic.png)
+![GOES-19 Global Cloud Forensic Analysis — 2026-05-05 11:00 UTC](Clouds_coverage/GOES-19_20260505_1100_forensic.png)
 
 Multi-satellite cloud forensic analysis tool. Queries geostationary cloud-mask products from up to 8 satellites simultaneously, extracts cloud/clear fractions for a user-defined region, ranks results by observation quality, and exports a GeoJSON summary.
 
