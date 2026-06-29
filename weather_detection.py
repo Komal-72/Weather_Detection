@@ -1103,7 +1103,7 @@ def main():
         datetime.strptime(f"{args.date} {args.time_utc}", "%Y-%m-%d %H:%M"))
 
     import sys
-    d_dir_early, s_dir_early = Path("Downloads"), Path("Clouds_coverage_c")
+    d_dir_early, s_dir_early = Path("Downloads"), Path("Clouds_coverage")
     d_dir_early.mkdir(exist_ok=True)
     s_dir_early.mkdir(exist_ok=True)
 
