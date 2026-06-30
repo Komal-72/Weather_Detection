@@ -1,6 +1,6 @@
 # weather_detection.py
 
-![GOES-19 Global Cloud Forensic Analysis — 2026-05-05 11:00 UTC](Clouds_coverage_c/GOES-19_20260505_1100_forensic.png)
+![GOES-19 Global Cloud Forensic Analysis — 2026-05-05 11:00 UTC](Clouds_coverage/GOES-19_20260505_1100_forensic.png)
 
 Multi-satellite cloud forensic analysis tool. Queries geostationary cloud-mask products from up to 8 satellites simultaneously, extracts cloud/clear fractions for a user-defined region, ranks results by observation quality, and exports a GeoJSON summary.
 
@@ -30,13 +30,7 @@ pip install xarray matplotlib cartopy numpy boto3 pytz botocore scipy \
             geopy pyproj eumdac shapely cfgrib h5netcdf
 ```
 
-**EUMDAC credentials** (required only for MSG-2, MSG-3, MTG-0):  
-Create `~/.eumdac/credentials` containing your EUMDAC key and secret on one line:
-
-```
-YOUR_KEY,YOUR_SECRET
-```
-
+**EUMDAC credentials** (required only for MSG-2, MSG-3, MTG-0)
 ---
 
 ## Usage
@@ -187,4 +181,3 @@ Results with VZA > 70° or no-data > 30% are flagged as unreliable.
 - **VZA > 70°** triggers an unreliable flag due to large pixel footprints and parallax displacement at steep off-nadir angles.
 - SEVIRI GRIB files use a static land-sea mask; coastal pixels may show mixed Clear Water / Clear Land values. Both are counted as clear.
 - Downloaded files are not deleted between runs. Remove `Downloads/` manually to force a fresh download.
-- The log file mirrors all stdout output. On Windows, ensure the terminal and log file use UTF-8 encoding (`chcp 65001` or set `PYTHONUTF8=1`) to avoid codec errors.
