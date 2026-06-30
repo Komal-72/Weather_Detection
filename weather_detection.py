@@ -776,6 +776,10 @@ def plot_msg2_dual_view(sat, region, address, utc_dt, s_dir,
             (b_lons[valid_disp], b_lats[valid_disp]),
             b_vals[valid_disp],
             (GX, GY), method='nearest')
+        try:
+            zoom_grid = _fix_fci_land_sea(zoom_grid, GY, GX)   # GY = lat grid, GX = lon grid
+        except Exception:
+            pass
     else:
         zoom_grid = None
 
@@ -789,6 +793,13 @@ def plot_msg2_dual_view(sat, region, address, utc_dt, s_dir,
     # Full-disk: render raw 2D array subsampled to ~1400×1400
     step_fd = max(1, _NI // 1400)
     raw_ss  = vals2d_full[::step_fd, ::step_fd].astype(float)
+    try:
+        lats2d_fd, lons2d_fd = _msg2_latlon_grid(sat_lon)
+        raw_ss = _fix_fci_land_sea(raw_ss,
+                                    lats2d_fd[::step_fd, ::step_fd],
+                                    lons2d_fd[::step_fd, ::step_fd])
+    except Exception:
+        pass
     half_ext = 5568000.0
     ax1.imshow(np.fliplr(raw_ss),
                origin='lower',
@@ -839,6 +850,33 @@ def plot_msg2_dual_view(sat, region, address, utc_dt, s_dir,
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
     plt.close()
     print(f"  [Output] Saved: {save_path}")
+
+
+def _fix_fci_land_sea(data, lats, lons):
+    """
+    MTG FCI / SEVIRI cloud_state uses an internal NWP land/sea mask that
+    misclassifies ocean pixels near coastlines and islands as Clear Land (1).
+    Correct against an independent, authoritative 1-arcminute land/sea grid
+    (the `global_land_mask` package — a precomputed NASA-derived raster, so
+    lookups are a vectorized array test with no per-call polygon math): any
+    pixel with cloud_state == 1 that lies over water → reclassify to 0.
+    Statistics are unaffected (both 0 and 1 count as clear); only the
+    rendered colour changes.
+    """
+    wrong = (data == 1) & np.isfinite(lats) & np.isfinite(lons)
+    if not wrong.any():
+        return data
+
+    from global_land_mask import globe
+
+    pts_lat = lats[wrong]
+    pts_lon = lons[wrong]
+    is_land = globe.is_land(pts_lat, pts_lon)
+
+    result = data.copy()
+    wrong_r, wrong_c = np.where(wrong)
+    result[wrong_r[~is_land], wrong_c[~is_land]] = 0
+    return result
 
 
 def _detect_lat_direction(lats_array):
@@ -903,6 +941,15 @@ def plot_split_view(sat, ds, mask, lats, lons, data_vals,
             need_fliplr = False
             half_ext    = 5568000.0   # fallback: SEVIRI full-disk extent
 
+        if config.get('variable') == 'cloud_state' and lats is not None:
+            try:
+                lats_ss = np.asarray(lats)[::step, ::step]
+                lons_ss = np.asarray(lons)[::step, ::step]
+                if lats_ss.shape == raw_ss.shape:
+                    raw_ss = _fix_fci_land_sea(raw_ss, lats_ss, lons_ss)
+            except Exception:
+                pass
+
         render_ss = np.fliplr(raw_ss) if need_fliplr else raw_ss
         ax_global.imshow(render_ss,
                          origin=fd_origin,
@@ -935,6 +982,12 @@ def plot_split_view(sat, ds, mask, lats, lons, data_vals,
     pts   = np.column_stack((lons[mask], lats[mask]))
     vals  = np.nan_to_num(data_vals.astype(float), nan=mapping['nodata_val'])
     gdata = griddata(pts, vals, (GX, GY), method='nearest')
+
+    if config.get('variable') == 'cloud_state':
+        try:
+            gdata = _fix_fci_land_sea(gdata, GY, GX)   # GY = lat grid, GX = lon grid
+        except Exception:
+            pass
 
     img = ax_zoom.imshow(gdata,
                          extent=[bbox['west'], bbox['east'],
@@ -1052,9 +1105,14 @@ def download_eumdac_data(satellite, utc_dt, download_dir):
         with zipfile.ZipFile(out_zip, 'r') as z:
             for f in z.namelist():
                 if f.endswith(config['file_ext']):
-                    z.extract(f, download_dir)
-                    target = os.path.join(download_dir, f)
-                    print(f"  Extracted: {f}"); break
+                    out_path = os.path.join(download_dir, f)
+                    if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+                        print(f"  Already extracted: {f}")
+                    else:
+                        z.extract(f, download_dir)
+                        print(f"  Extracted: {f}")
+                    target = out_path
+                    break
         return target
     except Exception as e:
         print(f"  EUMDAC Error: {e}")
